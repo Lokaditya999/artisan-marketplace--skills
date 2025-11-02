@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Navigation from "@/components/Navigation"
+import { useSession } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,9 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Upload, Package, Video, Lightbulb, TrendingUp } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Upload, Package, Video, Lightbulb, TrendingUp, Lock } from "lucide-react"
+import { toast } from "sonner"
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const { data: session, isPending } = useSession()
   const [productName, setProductName] = useState("")
   const [productPrice, setProductPrice] = useState("")
   const [productCategory, setProductCategory] = useState("")
@@ -21,6 +27,14 @@ export default function DashboardPage() {
   const [videoTitle, setVideoTitle] = useState("")
   const [videoCategory, setVideoCategory] = useState("")
   const [showSuccess, setShowSuccess] = useState(false)
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      toast.error("Please login to access the artisan dashboard")
+      router.push("/login?redirect=/dashboard")
+    }
+  }, [session, isPending, router])
 
   const categories = [
     { label: "Pottery", value: "pottery" },
@@ -32,6 +46,12 @@ export default function DashboardPage() {
 
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!session?.user) {
+      toast.error("You must be logged in to upload products")
+      return
+    }
+    
     // Simulate product upload
     setShowSuccess(true)
     setTimeout(() => setShowSuccess(false), 3000)
@@ -44,6 +64,12 @@ export default function DashboardPage() {
 
   const handleVideoSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!session?.user) {
+      toast.error("You must be logged in to upload videos")
+      return
+    }
+    
     // Simulate video upload
     setShowSuccess(true)
     setTimeout(() => setShowSuccess(false), 3000)
@@ -75,6 +101,38 @@ export default function DashboardPage() {
     }
   ]
 
+  // Show loading state while checking authentication
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-12 w-64 mb-8" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    )
+  }
+
+  // If not logged in, show login prompt
+  if (!session?.user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            <Lock className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
+            <h1 className="text-2xl font-bold mb-2">Authentication Required</h1>
+            <p className="text-muted-foreground mb-6">Please login to access the artisan dashboard</p>
+            <Button onClick={() => router.push("/login?redirect=/dashboard")}>
+              Login to Continue
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -82,7 +140,7 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Artisan Dashboard</h1>
-          <p className="text-muted-foreground">Manage your products, videos, and grow your craft business</p>
+          <p className="text-muted-foreground">Welcome back, {session.user.name}! Manage your products, videos, and grow your craft business</p>
         </div>
 
         {showSuccess && (

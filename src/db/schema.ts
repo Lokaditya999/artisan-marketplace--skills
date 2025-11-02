@@ -52,6 +52,17 @@ export const courses = sqliteTable('courses', {
   createdAt: text('created_at').notNull(),
 });
 
+// Add orders table
+export const orders = sqliteTable('orders', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  items: text('items', { mode: 'json' }).notNull(),
+  totalPrice: integer('total_price').notNull(),
+  totalQuantity: integer('total_quantity').notNull(),
+  shippingInfo: text('shipping_info', { mode: 'json' }).notNull(),
+  status: text('status').notNull().default('pending'),
+  createdAt: text('created_at').notNull(),
+});
 
 // Auth tables for better-auth
 export const user = sqliteTable("user", {

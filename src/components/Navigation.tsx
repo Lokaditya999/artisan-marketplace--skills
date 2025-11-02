@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, ShoppingBag, Video, GraduationCap, LayoutDashboard, ShoppingCart, LogOut, User } from "lucide-react"
+import { Menu, ShoppingBag, Video, GraduationCap, LayoutDashboard, ShoppingCart, LogOut, User, Package } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { authClient, useSession } from "@/lib/auth-client"
 import CartSidebar from "@/components/CartSidebar"
@@ -96,10 +96,16 @@ export default function Navigation() {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard">Dashboard</Link>
+                      <Link href="/dashboard">
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/checkout">My Orders</Link>
+                      <Link href="/orders">
+                        <Package className="h-4 w-4 mr-2" />
+                        My Orders
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
@@ -171,6 +177,10 @@ export default function Navigation() {
                               <p className="text-sm text-muted-foreground mb-2">Logged in as</p>
                               <p className="font-semibold">{session.user.name}</p>
                             </div>
+                            <Link href="/orders" className="text-lg font-medium hover:text-primary transition-colors">
+                              <Package className="h-4 w-4 mr-2 inline" />
+                              My Orders
+                            </Link>
                             <Button variant="outline" onClick={handleSignOut} className="w-full">
                               <LogOut className="h-4 w-4 mr-2" />
                               Logout

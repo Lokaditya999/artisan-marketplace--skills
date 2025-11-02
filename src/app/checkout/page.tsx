@@ -1,23 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import Navigation from "@/components/Navigation"
 import { useCart } from "@/contexts/CartContext"
+import { useSession } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, ShoppingBag } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ArrowLeft, ShoppingBag, Lock } from "lucide-react"
 import { toast } from "sonner"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { cart, totalQuantity, totalPrice, clearCart } = useCart()
+  const { data: session, isPending } = useSession()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -25,6 +29,14 @@ export default function CheckoutPage() {
     country: "",
     city: "",
   })
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      toast.error("Please login to proceed with checkout")
+      router.push("/login?redirect=/checkout")
+    }
+  }, [session, isPending, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -34,8 +46,14 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [name]: value })
   }
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!session?.user) {
+      toast.error("Please login to place an order")
+      router.push("/login?redirect=/checkout")
+      return
+    }
     
     if (cart.length === 0) {
       toast.error("Your cart is empty")
@@ -48,14 +66,79 @@ export default function CheckoutPage() {
       return
     }
 
-    // Simulate order processing
-    toast.success("Order placed successfully! Thank you for your purchase.")
-    clearCart()
-    
-    // Redirect to marketplace after a short delay
-    setTimeout(() => {
-      router.push("/marketplace")
-    }, 2000)
+    setIsSubmitting(true)
+
+    try {
+      const token = localStorage.getItem("bearer_token")
+      
+      // Create order in database
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items: cart,
+          totalPrice: totalPrice,
+          totalQuantity: totalQuantity,
+          shippingInfo: formData
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to create order")
+      }
+
+      const order = await response.json()
+      
+      toast.success(`Order #${order.id} placed successfully! Thank you for your purchase.`)
+      clearCart()
+      
+      // Redirect to orders page
+      setTimeout(() => {
+        router.push("/orders")
+      }, 1500)
+      
+    } catch (error) {
+      console.error("Checkout error:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to place order. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Show loading while checking authentication
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-12 w-64 mb-8" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    )
+  }
+
+  // Show login prompt if not authenticated
+  if (!session?.user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            <Lock className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
+            <h1 className="text-2xl font-bold mb-2">Authentication Required</h1>
+            <p className="text-muted-foreground mb-6">Please login to proceed with checkout</p>
+            <Button onClick={() => router.push("/login?redirect=/checkout")}>
+              Login to Continue
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (cart.length === 0) {
@@ -142,6 +225,7 @@ export default function CheckoutPage() {
                       onChange={handleInputChange}
                       placeholder="Enter your full name"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
 
@@ -155,6 +239,7 @@ export default function CheckoutPage() {
                       onChange={handleInputChange}
                       placeholder="Enter your phone number"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
 
@@ -167,6 +252,7 @@ export default function CheckoutPage() {
                       onChange={handleInputChange}
                       placeholder="Enter your address"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
 
@@ -176,6 +262,7 @@ export default function CheckoutPage() {
                       value={formData.country}
                       onValueChange={(value) => handleSelectChange("country", value)}
                       required
+                      disabled={isSubmitting}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Choose..." />
@@ -195,6 +282,7 @@ export default function CheckoutPage() {
                       value={formData.city}
                       onValueChange={(value) => handleSelectChange("city", value)}
                       required
+                      disabled={isSubmitting}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Choose..." />
@@ -221,8 +309,8 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg">
-                    CHECKOUT
+                  <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                    {isSubmitting ? "Processing..." : "PLACE ORDER"}
                   </Button>
                 </form>
               </CardContent>

@@ -1,18 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import Navigation from "@/components/Navigation"
 import { useCart } from "@/contexts/CartContext"
+import { useSession } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowLeft, ShoppingCart, MapPin, Award } from "lucide-react"
+import { ArrowLeft, ShoppingCart, MapPin, Award, Lock } from "lucide-react"
 import { toast } from "sonner"
 
 interface Product {
@@ -35,7 +36,9 @@ interface Product {
 
 export default function ProductDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const { addToCart } = useCart()
+  const { data: session, isPending } = useSession()
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -60,6 +63,16 @@ export default function ProductDetailPage() {
   }, [params.id])
 
   const handleAddToCart = () => {
+    if (!session?.user) {
+      toast.error("Please login to add items to cart", {
+        action: {
+          label: "Login",
+          onClick: () => router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+        }
+      })
+      return
+    }
+
     if (product) {
       addToCart({
         id: product.id,
@@ -145,10 +158,29 @@ export default function ProductDetailPage() {
             <Separator />
 
             <div className="space-y-3">
-              <Button size="lg" className="w-full" onClick={handleAddToCart}>
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
+              <Button 
+                size="lg" 
+                className="w-full" 
+                onClick={handleAddToCart}
+                disabled={isPending || !session?.user}
+              >
+                {!session?.user ? (
+                  <>
+                    <Lock className="mr-2 h-5 w-5" />
+                    Login to Add to Cart
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Add to Cart
+                  </>
+                )}
               </Button>
+              {!session?.user && (
+                <p className="text-sm text-center text-muted-foreground">
+                  You must be logged in to purchase products
+                </p>
+              )}
               <Button size="lg" variant="outline" className="w-full">
                 Contact Artisan
               </Button>
