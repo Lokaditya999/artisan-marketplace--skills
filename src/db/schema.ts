@@ -62,7 +62,7 @@ export const user = sqliteTable("user", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
-  userType: text("user_type").notNull(),
+  userType: text("user_type").default("buyer"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
