@@ -188,7 +188,7 @@ export default function Home() {
                     </CardContent>
                     <CardFooter className="p-4 pt-0">
                       <div className="flex justify-between items-center w-full">
-                        <span className="text-2xl font-bold">${product.price}</span>
+                        <span className="text-2xl font-bold">₹{product.price}</span>
                         <Button size="sm">View Details</Button>
                       </div>
                     </CardFooter>

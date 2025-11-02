@@ -86,7 +86,7 @@ export default function DashboardPage() {
     },
     {
       title: "Pricing Strategy",
-      advice: "Consider material costs, time invested, and market rates. Your ceramic products are priced competitively at $320-$1000 range.",
+      advice: "Consider material costs, time invested, and market rates. Your ceramic products are priced competitively at ₹320-₹1000 range.",
       icon: <TrendingUp className="h-5 w-5" />
     },
     {
@@ -185,7 +185,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="productPrice">Price ($)</Label>
+                      <Label htmlFor="productPrice">Price (₹)</Label>
                       <Input
                         id="productPrice"
                         type="number"
@@ -266,7 +266,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold">${(Math.random() * 500 + 300).toFixed(0)}</span>
+                        <span className="font-bold">₹{(Math.random() * 500 + 300).toFixed(0)}</span>
                         <Button variant="outline" size="sm">Edit</Button>
                       </div>
                     </div>
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                 <div className="p-4 bg-muted rounded-lg">
                   <h4 className="font-semibold mb-2">📈 Pricing Insight</h4>
                   <p className="text-sm text-muted-foreground">
-                    Ceramic products in the $400-$700 range have the highest conversion rate in your region.
+                    Ceramic products in the ₹400-₹700 range have the highest conversion rate in your region.
                   </p>
                 </div>
               </CardContent>

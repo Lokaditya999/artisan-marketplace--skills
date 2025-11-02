@@ -196,7 +196,7 @@ export default function CoursesPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="p-4 pt-0 flex justify-between items-center">
-                  <span className="text-2xl font-bold">${course.price}</span>
+                  <span className="text-2xl font-bold">₹{course.price}</span>
                   <Button>
                     <GraduationCap className="mr-2 h-4 w-4" />
                     Enroll Now

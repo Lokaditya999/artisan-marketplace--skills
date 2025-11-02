@@ -192,14 +192,14 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold">{item.name}</h3>
-                        <p className="text-sm text-muted-foreground">${item.price}/1 product</p>
+                        <p className="text-sm text-muted-foreground">₹{item.price}/1 product</p>
                       </div>
                       <div className="text-center">
                         <p className="text-sm text-muted-foreground mb-1">Quantity</p>
                         <p className="font-semibold">{item.quantity}</p>
                       </div>
                       <div className="text-right min-w-[80px]">
-                        <p className="font-bold text-lg">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-bold text-lg">₹{(item.price * item.quantity).toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
@@ -305,7 +305,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total Price</span>
-                      <span>${totalPrice.toFixed(2)}</span>
+                      <span>₹{totalPrice.toFixed(2)}</span>
                     </div>
                   </div>
 

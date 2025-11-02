@@ -132,7 +132,7 @@ export default function MarketplacePage() {
                     <Badge variant="secondary" className="text-xs">{product.category}</Badge>
                   </CardContent>
                   <CardFooter className="p-4 pt-0 flex justify-between items-center">
-                    <span className="text-2xl font-bold">${product.price}</span>
+                    <span className="text-2xl font-bold">₹{product.price}</span>
                     <Button size="sm">View Details</Button>
                   </CardFooter>
                 </Card>

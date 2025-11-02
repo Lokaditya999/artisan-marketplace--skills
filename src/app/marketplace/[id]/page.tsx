@@ -145,7 +145,7 @@ export default function ProductDetailPage() {
             <div>
               <Badge className="mb-3">{product.category}</Badge>
               <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
-              <p className="text-3xl font-bold text-primary">${product.price}</p>
+              <p className="text-3xl font-bold text-primary">₹{product.price}</p>
             </div>
 
             <Separator />
